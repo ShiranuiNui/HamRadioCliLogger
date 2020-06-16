@@ -43,6 +43,28 @@ func ReadPrevQSO() (models.QSO, error) {
 	return qsoArray[len(qsoArray)-1], nil
 }
 
+func ReadQSOByCallsign(callsign string) ([]models.QSO, error) {
+	usr, _ := user.Current()
+	logFileBytes, err := ioutil.ReadFile(usr.HomeDir + "/.hamradio_logger/log.json")
+	if err != nil {
+		return []models.QSO{}, err
+	}
+	if len(logFileBytes) == 0 {
+		return []models.QSO{}, nil
+	}
+	var qsoArray []models.QSO
+	var targetQSOArray []models.QSO
+	if err := json.Unmarshal(logFileBytes, &qsoArray); err != nil {
+		return []models.QSO{}, err
+	}
+	for _, qso := range qsoArray {
+		if qso.CallSign == callsign {
+			targetQSOArray = append(targetQSOArray, qso)
+		}
+	}
+	return targetQSOArray, nil
+}
+
 func EditLatestQSO(qso models.QSO) error {
 	currentQSOArray, err := ReadAllQSO()
 	if err != nil {
