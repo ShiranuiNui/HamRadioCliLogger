@@ -27,6 +27,34 @@ func ReadAllQSO() ([]models.QSO, error) {
 	return qsoArray, nil
 }
 
+func ReadPrevQSO() (models.QSO, error) {
+	usr, _ := user.Current()
+	logFileBytes, err := ioutil.ReadFile(usr.HomeDir + "/.hamradio_logger/log.json")
+	if err != nil {
+		return models.QSO{}, err
+	}
+	if len(logFileBytes) == 0 {
+		return models.QSO{}, nil
+	}
+	var qsoArray []models.QSO
+	if err := json.Unmarshal(logFileBytes, &qsoArray); err != nil {
+		return models.QSO{}, err
+	}
+	return qsoArray[len(qsoArray)-1], nil
+}
+
+func EditLatestQSO(qso models.QSO) error {
+	currentQSOArray, err := ReadAllQSO()
+	if err != nil {
+		return err
+	}
+	if len(currentQSOArray) == 1 {
+		return replaceAllQSO([]models.QSO{qso})
+	}
+	updatedQSOArray := append(currentQSOArray[:len(currentQSOArray)-2], qso)
+	return replaceAllQSO(updatedQSOArray)
+}
+
 func WriteQSO(qso models.QSO) error {
 	usr, _ := user.Current()
 	if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
@@ -42,6 +70,29 @@ func WriteQSO(qso models.QSO) error {
 		return err
 	}
 	jsonBytes, err := json.Marshal(append(currentQSOArray, qso))
+	if err != nil {
+		return err
+	}
+	if _, err = fmt.Fprintln(fp, string(jsonBytes)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func replaceAllQSO(qsoArray []models.QSO) error {
+	usr, _ := user.Current()
+	if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
+		os.Mkdir(usr.HomeDir+"/.hamradio_logger", 0777)
+	}
+	fp, err := os.OpenFile(usr.HomeDir+"/.hamradio_logger/log.json", os.O_RDWR|os.O_CREATE, 0664)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+	if err != nil {
+		return err
+	}
+	jsonBytes, err := json.Marshal(qsoArray)
 	if err != nil {
 		return err
 	}
