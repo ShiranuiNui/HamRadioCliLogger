@@ -49,7 +49,7 @@ func init() {
 		Action: func(c *cli.Context) error {
 			time := models.ISO8601Time{Time: time.Now()}
 			qso := models.QSO{MyCallSign: c.String("mycallsign"), CallSign: c.String("callsign"), Time: time, Report: c.String("report"), Frequency: c.Int("freq"), Mode: c.String("mode"), IsRequestedQSLCard: c.Bool("isRequestedQSLCard")}
-			if err := repo.WriteQSO(qso); err != nil {
+			if err := repo.WriteQSO(qso, c.String("log_file_path")); err != nil {
 				log.Fatal(err)
 				return cli.Exit("", 1)
 			}

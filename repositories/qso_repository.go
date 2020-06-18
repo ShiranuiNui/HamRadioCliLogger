@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/user"
 
 	"github.com/ShiranuiNui/HamRadioCliLogger/models"
 	tw "github.com/olekukonko/tablewriter"
 )
 
-func ReadAllQSO() ([]models.QSO, error) {
-	usr, _ := user.Current()
-	logFileBytes, err := ioutil.ReadFile(usr.HomeDir + "/.hamradio_logger/log.json")
+func ReadAllQSO(logFilePath string) ([]models.QSO, error) {
+	logFileBytes, err := ioutil.ReadFile(logFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -27,9 +25,8 @@ func ReadAllQSO() ([]models.QSO, error) {
 	return qsoArray, nil
 }
 
-func ReadPrevQSO() (models.QSO, error) {
-	usr, _ := user.Current()
-	logFileBytes, err := ioutil.ReadFile(usr.HomeDir + "/.hamradio_logger/log.json")
+func ReadPrevQSO(logFilePath string) (models.QSO, error) {
+	logFileBytes, err := ioutil.ReadFile(logFilePath)
 	if err != nil {
 		return models.QSO{}, err
 	}
@@ -43,9 +40,8 @@ func ReadPrevQSO() (models.QSO, error) {
 	return qsoArray[len(qsoArray)-1], nil
 }
 
-func ReadQSOByCallsign(callsign string) ([]models.QSO, error) {
-	usr, _ := user.Current()
-	logFileBytes, err := ioutil.ReadFile(usr.HomeDir + "/.hamradio_logger/log.json")
+func ReadQSOByCallsign(callsign string, logFilePath string) ([]models.QSO, error) {
+	logFileBytes, err := ioutil.ReadFile(logFilePath)
 	if err != nil {
 		return []models.QSO{}, err
 	}
@@ -65,29 +61,31 @@ func ReadQSOByCallsign(callsign string) ([]models.QSO, error) {
 	return targetQSOArray, nil
 }
 
-func EditLatestQSO(qso models.QSO) error {
-	currentQSOArray, err := ReadAllQSO()
+func EditLatestQSO(qso models.QSO, logFilePath string) error {
+	currentQSOArray, err := ReadAllQSO(logFilePath)
 	if err != nil {
 		return err
 	}
 	if len(currentQSOArray) == 1 {
-		return replaceAllQSO([]models.QSO{qso})
+		return replaceAllQSO([]models.QSO{qso}, logFilePath)
 	}
 	updatedQSOArray := append(currentQSOArray[:len(currentQSOArray)-2], qso)
-	return replaceAllQSO(updatedQSOArray)
+	return replaceAllQSO(updatedQSOArray, logFilePath)
 }
 
-func WriteQSO(qso models.QSO) error {
-	usr, _ := user.Current()
-	if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
-		os.Mkdir(usr.HomeDir+"/.hamradio_logger", 0777)
-	}
-	fp, err := os.OpenFile(usr.HomeDir+"/.hamradio_logger/log.json", os.O_RDWR|os.O_CREATE, 0664)
+func WriteQSO(qso models.QSO, logFilePath string) error {
+	/*
+		usr, _ := user.Current()
+		if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
+			os.Mkdir(usr.HomeDir+"/.hamradio_logger", 0777)
+		}
+	*/
+	fp, err := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE, 0664)
 	if err != nil {
 		return err
 	}
 	defer fp.Close()
-	currentQSOArray, err := ReadAllQSO()
+	currentQSOArray, err := ReadAllQSO(logFilePath)
 	if err != nil {
 		return err
 	}
@@ -101,12 +99,14 @@ func WriteQSO(qso models.QSO) error {
 	return nil
 }
 
-func replaceAllQSO(qsoArray []models.QSO) error {
-	usr, _ := user.Current()
-	if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
-		os.Mkdir(usr.HomeDir+"/.hamradio_logger", 0777)
-	}
-	fp, err := os.OpenFile(usr.HomeDir+"/.hamradio_logger/log.json", os.O_RDWR|os.O_CREATE, 0664)
+func replaceAllQSO(qsoArray []models.QSO, logFilePath string) error {
+	/*
+		usr, _ := user.Current()
+		if _, err := os.Stat(usr.HomeDir + "/.hamradio_logger"); os.IsNotExist(err) {
+			os.Mkdir(usr.HomeDir+"/.hamradio_logger", 0777)
+		}
+	*/
+	fp, err := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE, 0664)
 	if err != nil {
 		return err
 	}

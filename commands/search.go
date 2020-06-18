@@ -2,12 +2,9 @@ package commands
 
 import (
 	"log"
-	"os"
-	"os/user"
 
 	repo "github.com/ShiranuiNui/HamRadioCliLogger/repositories"
 	"github.com/urfave/cli/v2"
-	"github.com/urfave/cli/v2/altsrc"
 )
 
 func init() {
@@ -23,18 +20,8 @@ func init() {
 		Name:  "search",
 		Usage: "Search QSO Logging by Callsign",
 		Flags: flags,
-		Before: altsrc.InitInputSource(flags, func() (altsrc.InputSourceContext, error) {
-			usr, _ := user.Current()
-			if _, err := os.Stat(usr.HomeDir + "/.config/hamradio_logger"); os.IsNotExist(err) {
-				os.Mkdir(usr.HomeDir+"/.config/hamradio_logger", 0777)
-			}
-			if _, err := os.Stat(usr.HomeDir + "/.config/hamradio_logger/config.yaml"); os.IsNotExist(err) {
-				return &altsrc.MapInputSource{}, nil
-			}
-			return altsrc.NewYamlSourceFromFile(usr.HomeDir + "/.config/hamradio_logger/config.yaml")
-		}),
 		Action: func(c *cli.Context) error {
-			qso, err := repo.ReadQSOByCallsign(c.String("callsign"))
+			qso, err := repo.ReadQSOByCallsign(c.String("callsign"), c.String("log_file_path"))
 			if err != nil {
 				log.Fatal(err)
 				return cli.Exit("", 1)

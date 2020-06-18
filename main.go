@@ -41,6 +41,7 @@ func main() {
 		altsrc.NewStringFlag(&cli.StringFlag{
 			Name:  "log_file_path",
 			Usage: "Log File Path",
+			Value: usr.HomeDir + "/hamradio_logger/log.json",
 		}),
 	}
 	app := &cli.App{

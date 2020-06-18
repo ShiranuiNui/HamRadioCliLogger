@@ -4,3 +4,4 @@ qth: JCC:010101 GL:QN03QB (HOME)
 rig: FT-991M
 output: 10W
 antenna: 1m Mobile Whip (1mH)
+log_file_path: ./sample_log.json

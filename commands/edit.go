@@ -2,13 +2,10 @@ package commands
 
 import (
 	"log"
-	"os"
-	"os/user"
 
 	"github.com/ShiranuiNui/HamRadioCliLogger/models"
 	repo "github.com/ShiranuiNui/HamRadioCliLogger/repositories"
 	"github.com/urfave/cli/v2"
-	"github.com/urfave/cli/v2/altsrc"
 )
 
 func init() {
@@ -44,18 +41,8 @@ func init() {
 		Name:  "edit-prev",
 		Usage: "Edit Previous QSO Logging",
 		Flags: flags,
-		Before: altsrc.InitInputSource(flags, func() (altsrc.InputSourceContext, error) {
-			usr, _ := user.Current()
-			if _, err := os.Stat(usr.HomeDir + "/.config/hamradio_logger"); os.IsNotExist(err) {
-				os.Mkdir(usr.HomeDir+"/.config/hamradio_logger", 0777)
-			}
-			if _, err := os.Stat(usr.HomeDir + "/.config/hamradio_logger/config.yaml"); os.IsNotExist(err) {
-				return &altsrc.MapInputSource{}, nil
-			}
-			return altsrc.NewYamlSourceFromFile(usr.HomeDir + "/.config/hamradio_logger/config.yaml")
-		}),
 		Action: func(c *cli.Context) error {
-			qso, err := repo.ReadPrevQSO()
+			qso, err := repo.ReadPrevQSO(c.String("log_file_path"))
 			if err != nil {
 				log.Fatal(err)
 				return cli.Exit("", 1)
@@ -78,7 +65,7 @@ func init() {
 			if c.Bool("isRequestedQSLCard") != qso.IsRequestedQSLCard {
 				qso.IsRequestedQSLCard = c.Bool("isRequestedQSLCard")
 			}
-			if err := repo.EditLatestQSO(qso); err != nil {
+			if err := repo.EditLatestQSO(qso, c.String("log_file_path")); err != nil {
 				log.Fatal(err)
 				return cli.Exit("", 1)
 			}
