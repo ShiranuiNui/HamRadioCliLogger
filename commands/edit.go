@@ -39,11 +39,6 @@ func init() {
 			Value:   false,
 			Aliases: []string{"q"},
 		},
-		altsrc.NewStringFlag(&cli.StringFlag{
-			Name:    "mycallsign",
-			Usage:   "mycallsign",
-			Aliases: []string{"mc"},
-		}),
 	}
 	CmdList = append(CmdList, &cli.Command{
 		Name:  "edit-prev",
