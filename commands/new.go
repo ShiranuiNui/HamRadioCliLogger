@@ -2,7 +2,6 @@ package commands
 
 import (
 	"log"
-	"time"
 
 	"github.com/ShiranuiNui/HamRadioCliLogger/models"
 	repo "github.com/ShiranuiNui/HamRadioCliLogger/repositories"
@@ -41,14 +40,23 @@ func init() {
 			Value:   false,
 			Aliases: []string{"q"},
 		},
+		&cli.StringFlag{
+			Name:    "qsl_remarks",
+			Usage:   "Remakrs for QSL Card",
+			Aliases: []string{"qrmks"},
+		},
+		&cli.StringFlag{
+			Name:    "remarks",
+			Usage:   "Remakrs(Not Use for QSL Card)",
+			Aliases: []string{"rmks"},
+		},
 	}
 	CmdList = append(CmdList, &cli.Command{
 		Name:  "new",
 		Usage: "Create New QSO Logging",
 		Flags: flags,
 		Action: func(c *cli.Context) error {
-			time := models.ISO8601Time{Time: time.Now()}
-			qso := models.QSO{MyCallSign: c.String("mycallsign"), CallSign: c.String("callsign"), Time: time, Report: c.String("report"), Frequency: c.Int("freq"), Mode: c.String("mode"), IsRequestedQSLCard: c.Bool("isRequestedQSLCard")}
+			qso := models.NewQSOFromCliContext(c)
 			if err := repo.WriteQSO(qso, c.String("log_file_path")); err != nil {
 				log.Fatal(err)
 				return cli.Exit("", 1)
