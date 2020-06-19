@@ -131,7 +131,7 @@ func ShowQSOTable(qso []models.QSO) {
 	}
 	table := tw.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"MyCallSign", "CallSign", "Time", "Report", "Frequency", "Mode", "IsRequestedQSLCard"})
+	table.SetHeader([]string{"CallSign", "Time", "Report", "Frequency", "Mode", "Remarks"})
 	table.AppendBulk(qsoStringArray)
 	table.Render()
 }

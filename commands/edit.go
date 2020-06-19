@@ -36,6 +36,16 @@ func init() {
 			Value:   false,
 			Aliases: []string{"q"},
 		},
+		&cli.StringFlag{
+			Name:    "qsl_remarks",
+			Usage:   "Remakrs for QSL Card",
+			Aliases: []string{"qrmks"},
+		},
+		&cli.StringFlag{
+			Name:    "remarks",
+			Usage:   "Remakrs(Not Use for QSL Card)",
+			Aliases: []string{"rmks"},
+		},
 	}
 	CmdList = append(CmdList, &cli.Command{
 		Name:  "edit-prev",
@@ -47,23 +57,26 @@ func init() {
 				log.Fatal(err)
 				return cli.Exit("", 1)
 			}
-			if c.String("mycallsign") != "" {
-				qso.MyCallSign = c.String("mycallsign")
-			}
-			if c.String("callsign") != "" {
+			if c.IsSet("callsign") {
 				qso.CallSign = c.String("callsign")
 			}
-			if c.String("report") != "" {
+			if c.IsSet("report") {
 				qso.Report = c.String("report")
 			}
-			if c.Int("freq") != 0 {
+			if c.IsSet("freq") {
 				qso.Frequency = c.Int("freq")
 			}
-			if c.String("mode") != "" {
+			if c.IsSet("mode") {
 				qso.Mode = c.String("mode")
 			}
-			if c.Bool("isRequestedQSLCard") != qso.IsRequestedQSLCard {
-				qso.IsRequestedQSLCard = c.Bool("isRequestedQSLCard")
+			if c.IsSet("isRequestedQSLCard") {
+				qso.QSLCardStatuses.IsRequestedQSLCard = c.Bool("isRequestedQSLCard")
+			}
+			if c.IsSet("qsl_remarks") {
+				qso.QSLRemarks = c.String("qsl_remarks")
+			}
+			if c.IsSet("remarks") {
+				qso.Remarks = c.String("remarks")
 			}
 			if err := repo.EditLatestQSO(qso, c.String("log_file_path")); err != nil {
 				log.Fatal(err)

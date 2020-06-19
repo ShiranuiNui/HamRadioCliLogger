@@ -9,39 +9,64 @@ import (
 )
 
 type QSO struct {
-	MyCallSign         string      `json:"my_call_sign"`
-	CallSign           string      `json:"call_sign"`
-	Time               ISO8601Time `json:"time"`
-	Report             string      `json:"report"`
-	Frequency          int         `json:"frequency"`
-	Mode               string      `json:"mode"`
-	IsRequestedQSLCard bool        `json:"is_requested_qsl_card"`
-	QSLRemarks         string      `json:"qsl_remarks"`
-	Remarks            string      `json:"remarks"`
+	CallSign             string               `json:"call_sign"`
+	Time                 ISO8601Time          `json:"time"`
+	Report               string               `json:"report"`
+	Frequency            int                  `json:"frequency"`
+	Mode                 string               `json:"mode"`
+	QSLCardStatuses      QSLCardStatuses      `json:"qsl_card_statuses"`
+	QSLRemarks           string               `json:"qsl_remarks"`
+	Remarks              string               `json:"remarks"`
+	MyStationInfomations MyStationInfomations `json:"my_stations_infomations"`
+}
+
+type QSLCardStatuses struct {
+	IsRequestedQSLCard bool `json:"is_requested_qsl_card"`
+	IsSentQSLCard      bool `json:"is_sent_qsl_card"`
+	IsReceivedQSLCard  bool `json:"is_reveiced_qsl_card"`
+}
+
+type MyStationInfomations struct {
+	MyCallSign string `json:"my_call_sign"`
+	QTH        string `json:"qth"`
+	Rig        string `json:"rig"`
+	Output     string `json:"output"`
+	Antenna    string `json:"antenna"`
 }
 
 func NewQSOFromCliContext(c *cli.Context) QSO {
 	time := ISO8601Time{Time: time.Now()}
-	qso := QSO{MyCallSign: c.String("mycallsign"),
-		CallSign:           c.String("callsign"),
-		Time:               time,
-		Report:             c.String("report"),
-		Frequency:          c.Int("freq"),
-		Mode:               c.String("mode"),
+	qslCardStatuses := QSLCardStatuses{
 		IsRequestedQSLCard: c.Bool("isRequestedQSLCard"),
-		QSLRemarks:         c.String("qsl_remarks"),
-		Remarks:            c.String("remarks"),
+	}
+	myStationsInfomations := MyStationInfomations{
+		MyCallSign: c.String("mycallsign"),
+		QTH:        c.String("qth"),
+		Rig:        c.String("rig"),
+		Output:     c.String("output"),
+		Antenna:    c.String("antenna"),
+	}
+	qso := QSO{
+		CallSign:             c.String("callsign"),
+		Time:                 time,
+		Report:               c.String("report"),
+		Frequency:            c.Int("freq"),
+		Mode:                 c.String("mode"),
+		QSLCardStatuses:      qslCardStatuses,
+		QSLRemarks:           c.String("qsl_remarks"),
+		Remarks:              c.String("remarks"),
+		MyStationInfomations: myStationsInfomations,
 	}
 	return qso
 }
 
 func (q *QSO) ToStrArray() []string {
-	return []string{q.MyCallSign,
+	return []string{
 		q.CallSign,
-		q.Time.Format("2006-01-02T15:04:05-0700"),
+		q.Time.Format("2006-01-02T15:04-0700"),
 		q.Report, strconv.Itoa(q.Frequency),
 		q.Mode,
-		strconv.FormatBool(q.IsRequestedQSLCard),
+		q.Remarks,
 	}
 }
 
